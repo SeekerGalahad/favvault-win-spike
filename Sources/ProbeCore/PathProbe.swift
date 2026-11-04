@@ -149,8 +149,10 @@ public enum PathProbe {
 
             let raw = (try? Data(contentsOf: url)) ?? Data()
             let reread = (try? String(contentsOf: url, encoding: .utf8)) ?? ""
-            let crCount = reread.filter { $0 == "\r" }.count
-            let lfCount = reread.filter { $0 == "\n" }.count
+            // Count scalar-wise: in Swift a CRLF pair is a single Character,
+            // so Character counting would hide the line ending entirely.
+            let crCount = reread.unicodeScalars.filter { $0 == "\r" }.count
+            let lfCount = reread.unicodeScalars.filter { $0 == "\n" }.count
 
             // Appending through FileHandle must not rewrite existing bytes.
             let handle = try FileHandle(forWritingTo: url)
@@ -161,12 +163,13 @@ public enum PathProbe {
 
             let details: [String: String] = [
                 "byteCount": "\(raw.count)",
-                "crCount": "\(crCount)",
-                "lfCount": "\(lfCount)",
+                "crScalarCount": "\(crCount)",
+                "lfScalarCount": "\(lfCount)",
+                "characterCount": "\(reread.count)",
                 "bytesUnchangedByWrite": "\(raw == Data(text.utf8))",
                 "appendByteCount": "\(after.count)"
             ]
-            let ok = raw == Data(text.utf8) && crCount == 2 && lfCount == 3
+            let ok = raw == Data(text.utf8) && crCount == 2 && lfCount == 2
             return ProbeResult(name: "path.lineEndings", ok: ok, details: details)
         } catch {
             ProbeLog.recordError("path.lineEndings", error)
