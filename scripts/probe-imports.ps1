@@ -5,7 +5,9 @@ $swiftc = (Get-Command swiftc -ErrorAction Stop).Source
 $rows = @()
 
 Get-ChildItem -Path $importsDir -Filter *.swift | Sort-Object Name | ForEach-Object {
-    $module = $_.BaseName
+    # Files are prefixed with m_ so that swiftc does not infer a module name
+    # equal to the imported one ("file is part of module X; ignoring import").
+    $module = $_.BaseName -replace '^m_', ''
     $stderrFile = Join-Path $env:TEMP ("probe-" + $module + ".err.txt")
     $stdoutFile = Join-Path $env:TEMP ("probe-" + $module + ".out.txt")
 

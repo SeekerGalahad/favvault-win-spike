@@ -56,5 +56,5 @@ jobs:
       - name: Cross-check exit code propagation
         shell: pwsh
         run: |
-          swiftc -typecheck imports/DefinitelyMissingModule.swift
+          swiftc -typecheck imports/m_DefinitelyMissingModule.swift
           Write-Output "DIRECT_EXIT=$LASTEXITCODE"
