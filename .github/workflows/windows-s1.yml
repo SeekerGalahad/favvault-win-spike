@@ -1,0 +1,54 @@
+name: windows-swift-probe
+
+# Sanitized probe only: no application code, no private modules, no submodules.
+# Pinned versions (looked up on 2026-11-04):
+#   - compnerd/gha-setup-swift  -> v0.5.1 (latest release tag at that time)
+#   - compnerd/gha-setup-vsdevenv -> v7 (latest release tag at that time)
+#   - Swift toolchain -> 6.3.3 for Windows x86_64
+#     source: https://www.swift.org/install/windows/ (archived releases table, retrieved 2026-11-04)
+#     installer: https://download.swift.org/swift-6.3.3-release/windows10/swift-6.3.3-RELEASE/swift-6.3.3-RELEASE-windows10.exe
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    name: Swift 6.3.3 on windows-latest (x64)
+    runs-on: windows-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare MSVC environment
+        uses: compnerd/gha-setup-vsdevenv@v7
+
+      - name: Install Swift 6.3.3
+        uses: compnerd/gha-setup-swift@v0.5.1
+        with:
+          swift-version: swift-6.3.3-release
+          swift-build: 6.3.3-RELEASE
+
+      - name: Show toolchain
+        run: |
+          swift --version
+          swiftc --version
+
+      - name: Build probe library
+        run: swift build
+
+      - name: Run probe tests
+        run: swift test
+
+      # Apple-only / C-module imports are expected to be unavailable on Windows.
+      # This step reports them per file; it never masks build or test failures
+      # because those steps run first and are hard gates.
+      - name: Module import matrix (informational)
+        shell: pwsh
+        run: ./scripts/probe-imports.ps1
