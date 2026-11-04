@@ -25,6 +25,10 @@ Get-ChildItem -Path $importsDir -Filter *.swift | Sort-Object Name | ForEach-Obj
     }
 
     $ok = ($process.ExitCode -eq 0)
+    $rawDiag = ($diagnostics | Where-Object { $_ -and $_.Trim().Length -gt 0 })
+    $diagHead = ($rawDiag | Select-Object -First 2) -join ' / '
+    if ($diagHead.Length -gt 200) { $diagHead = $diagHead.Substring(0, 200) }
+    Write-Output ("DIAG|{0}|lines={1}|exit={2}|{3}" -f $module, $rawDiag.Count, $process.ExitCode, $diagHead)
     $rows += [pscustomobject]@{ Module = $module; Exit = $process.ExitCode; Status = $(if ($ok) { 'OK' } else { 'FAIL' }); Note = $note }
     Write-Output ("IMPORT|{0}|{1}|exit={2}|{3}" -f $module, $(if ($ok) { 'OK' } else { 'FAIL' }), $process.ExitCode, $note)
 }

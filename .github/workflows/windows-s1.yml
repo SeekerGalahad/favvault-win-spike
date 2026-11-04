@@ -52,3 +52,9 @@ jobs:
       - name: Module import matrix (informational)
         shell: pwsh
         run: ./scripts/probe-imports.ps1
+
+      - name: Cross-check exit code propagation
+        shell: pwsh
+        run: |
+          swiftc -typecheck imports/DefinitelyMissingModule.swift
+          Write-Output "DIRECT_EXIT=$LASTEXITCODE"
