@@ -66,3 +66,6 @@ jobs:
             Write-Output "HARNESS_BROKEN: expected exit 1 for a missing module"
             exit 1
           }
+          # GitHub's pwsh wrapper exits with $LASTEXITCODE, which is still 1
+          # from the intentional failing compile; reset it explicitly.
+          exit 0
