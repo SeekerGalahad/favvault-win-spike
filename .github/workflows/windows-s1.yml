@@ -58,8 +58,9 @@ jobs:
       - name: Cross-check exit code propagation
         shell: pwsh
         run: |
-          swiftc -typecheck imports/m_DefinitelyMissingModule.swift 2>&1 | Select-Object -First 2
+          $out = swiftc -typecheck imports/m_DefinitelyMissingModule.swift 2>&1
           $code = $LASTEXITCODE
+          $out | Select-Object -First 2
           Write-Output "DIRECT_EXIT=$code"
           if ($code -ne 1) {
             Write-Output "HARNESS_BROKEN: expected exit 1 for a missing module"
