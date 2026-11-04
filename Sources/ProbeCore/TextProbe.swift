@@ -100,7 +100,7 @@ public enum TextProbe {
     public static func dateFormatting() -> ProbeResult {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.timeZone = TimeZone(secondsFromGMT: 0)
+        formatter.timeZone = TimeZone(secondsFromGMT: 0)!
         formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
 
         let instant = Date(timeIntervalSince1970: 1_700_000_000)
@@ -108,7 +108,7 @@ public enum TextProbe {
         let parsed = formatter.date(from: rendered)
 
         var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = TimeZone(secondsFromGMT: 0)
+        calendar.timeZone = TimeZone(secondsFromGMT: 0)!
         let components = calendar.dateComponents([.year, .month, .day, .hour], from: instant)
 
         let iso = ISO8601DateFormatter()
