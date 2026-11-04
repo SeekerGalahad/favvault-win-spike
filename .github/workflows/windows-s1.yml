@@ -53,8 +53,15 @@ jobs:
         shell: pwsh
         run: ./scripts/probe-imports.ps1
 
+      # Harness self-test: the sentinel must be reported as a hard failure.
+      # Exits 0 when exit-code propagation is correct.
       - name: Cross-check exit code propagation
         shell: pwsh
         run: |
-          swiftc -typecheck imports/m_DefinitelyMissingModule.swift
-          Write-Output "DIRECT_EXIT=$LASTEXITCODE"
+          swiftc -typecheck imports/m_DefinitelyMissingModule.swift 2>&1 | Select-Object -First 2
+          $code = $LASTEXITCODE
+          Write-Output "DIRECT_EXIT=$code"
+          if ($code -ne 1) {
+            Write-Output "HARNESS_BROKEN: expected exit 1 for a missing module"
+            exit 1
+          }
